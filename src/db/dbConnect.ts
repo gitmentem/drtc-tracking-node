@@ -25,10 +25,10 @@ class DatabaseConnection {
 
   private configs = {
     prod: {
-      db: { ...this.prodConfig, database: "drtcstock" },
+      db: { ...this.prodConfig, database: process.env.DB_NAME },
     },
     local: {
-      db: { ...this.localConfig, database: "drtcstock" },
+      db: { ...this.localConfig, database: process.env.DB_NAME },
     },
   };
 
