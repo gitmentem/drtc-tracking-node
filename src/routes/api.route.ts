@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { TryCatch } from "@/middlewares/error";
-import { Request, Response, NextFunction } from "express";
-import { db } from "@/db/dbConnect";
-import { formatDateDMY, GetBranchDBName_Web, getFullDocumentNo, logQuery, ucwords } from "@/utils/commonFunctions";
-import { ApiResponse, IDetailsLine } from "@/types/response.type";
+import { TryCatch } from "@/middlewares/error.js";
+import { type Request, type Response, type NextFunction } from "express";
+import { db } from "@/db/dbConnect.js";
+import { formatDateDMY, GetBranchDBName_Web, getFullDocumentNo, logQuery, ucwords } from "@/utils/commonFunctions.js";
+import { type ApiResponse, type IDetailsLine } from "@/types/response.type.js";
 
 const router = Router();
 

@@ -1,4 +1,4 @@
-import mysql, { Connection } from "mysql2/promise";
+import mysql, { type Connection } from "mysql2/promise";
 import { config } from "dotenv";
 config();
 

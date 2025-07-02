@@ -1,8 +1,8 @@
 import mysql from "mysql2/promise";
 import * as path from 'path';
 import * as fs from 'fs';
-import { db } from "@/db/dbConnect";
-import { DB_PREFIX } from "./constants";
+import { db } from "@/db/dbConnect.js";
+import { DB_PREFIX } from "./constants.js";
 
 export  function logQuery(psql:string , pvalues?:any[], pshouldconsole: boolean = true):void {
     let formattedQuery;

@@ -9,6 +9,7 @@
     "outDir": "./dist",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax":true,
     "baseUrl": "./",
     "paths": {
         "@/*": ["src/*"]

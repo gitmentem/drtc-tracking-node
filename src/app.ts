@@ -3,7 +3,7 @@ import helmet from "helmet"
 import { errorMiddleware } from "@/middlewares/error.js"
 import morgan from "morgan"
 import dotenv from "dotenv"
-import trackingRoutes from "@/routes/api.route";
+import trackingRoutes from "@/routes/api.route.js";
   
 dotenv.config({path: './.env',});
 
