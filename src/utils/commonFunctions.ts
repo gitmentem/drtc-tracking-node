@@ -41,7 +41,7 @@ export function ucwords(str: string): string {
     // ! wont work on this usecase :ucwords(hello-world)
 }
 
-export async function GetBranchDBName_BranchId_Web(link: any, branchid: string): Promise<string> {
+export async function GetBranchDBName_BranchId_Web(branchid: string): Promise<string> {
     let sql = "select pbranchcode from subbranchtable where branchid = ?";
     let values  = [branchid];
 
