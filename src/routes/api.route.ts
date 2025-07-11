@@ -147,7 +147,7 @@ router.post(
                     break;
                   }
 
-                  dbname = GetBranchDBName_BranchId_Web(outwardto) + ".";
+                  dbname = await GetBranchDBName_BranchId_Web(outwardto) + ".";
                   challannofull = outwardnofull;
                   sql = `select inwarddate from ${dbname}inward as i left join ${dbname}inwardtrans as it
                     on i.challannofull = it.challannofull
@@ -222,7 +222,8 @@ router.post(
         console.log(error);
         return res.status(500).json(error);
       } finally{
-        if(connection ) await connection.end();
+        if(connection ) connection.destroy();
+        console.log("after connection destroyed");
       }
     }
   )
