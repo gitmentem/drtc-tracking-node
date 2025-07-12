@@ -222,8 +222,10 @@ router.post(
         console.log(error);
         return res.status(500).json(error);
       } finally{
-        if(connection ) connection.destroy();
-        console.log("after connection destroyed");
+        if(connection) {
+          await connection.end()
+        };
+        console.log("after connection ended");
       }
     }
   )
