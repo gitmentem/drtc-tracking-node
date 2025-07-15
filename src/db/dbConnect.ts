@@ -20,7 +20,7 @@ class DatabaseConnection {
   private localConfig = {
     host: "localhost",
     user: "root",
-    password: "",
+    password: "123456",
   };
 
   private configs = {
@@ -28,7 +28,7 @@ class DatabaseConnection {
       db: { ...this.prodConfig, database: process.env.DB_NAME },
     },
     local: {
-      db: { ...this.localConfig, database: process.env.DB_NAME },
+      db: { ...this.localConfig, database: "new" },
     },
   };
 

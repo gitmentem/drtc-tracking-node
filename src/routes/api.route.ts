@@ -2,26 +2,29 @@ import { Router } from "express";
 import { TryCatch } from "@/middlewares/error.js";
 import { type Request, type Response, type NextFunction } from "express";
 import { db } from "@/db/dbConnect.js";
-import { formatDateDMY, GetBranchDBName_BranchId_Web, GetBranchDBName_Web, getFullDocumentNo, logQuery, ucwords } from "@/utils/commonFunctions.js";
+import { formatDateDMY, GetBranchDBName_BranchId_Web, GetBranchDBName_Web, getFullDocumentNo, log, logQuery, ucwords } from "@/utils/commonFunctions.js";
 import { type ApiResponse, type IDetailsLine } from "@/types/response.type.js";
+import type { ITrackingRequest } from "@/types/tracking.type";
 
 const router = Router();
 
-router.get("/db-test", async(req:Request, res:Response)=>{
-  const connection  = await db.Db();
+router.post("/db-test", async(req:Request, res:Response)=>{
+  let connection;
   try{
-    let sql = `select branchname from branchmaster where branchid = 995`
+    connection  = await db.Db();
+    let sql = `select * from companymaster`
     const [rows]: any = await connection.query(sql)
     console.log("rows::",rows);
     res.send("working")
   } finally {
     if(connection) await connection.end();
+    log("after connection ended::", connection)
   }
 })
 
 router.post(
   "/track", async (
-      req: Request<{},{},{ sourcebranchcode: string; biltystateno: string; biltyno: string }>,
+      req: Request<{},{}, ITrackingRequest>,
       res: Response,
       next: NextFunction
     ) => {
@@ -39,6 +42,7 @@ router.post(
         let dbname: string;
 
         let { sourcebranchcode, biltystateno, biltyno } = req.body;
+        log("req body::", req.body);
 
         sourcebranchcode = sourcebranchcode.toUpperCase();
 
@@ -47,6 +51,7 @@ router.post(
         } else {
           dbname = await GetBranchDBName_Web(sourcebranchcode) + ".";
           biltynofull = getFullDocumentNo(sourcebranchcode, biltystateno, biltyno); 
+          log("biltynofull::", biltynofull)
 
           sql = `select sourcebranchcode, 
           biltystateno, 
@@ -71,6 +76,8 @@ router.post(
           logQuery(sql, values);
           const [rows] : any = await connection.query(sql, values);
 
+          log("first query rows::", rows);
+
           if (rows?.length === 0) {
             apiresponse["status"] = "error";
             apiresponse["message"] = "G.R. not found";
@@ -82,6 +89,8 @@ router.post(
             biltystateno = row["biltystateno"];
             biltyno = row["biltyno"];
             biltydate = formatDateDMY(row["biltydate"]);
+
+            log("uc words from frombranchname::", ucwords(row["frombranchname"]));
 
             let outwardto = '';
             let outwarddate = '';
@@ -132,6 +141,8 @@ router.post(
                 logQuery(sql, values);
                 const [outward_rows]: any = await connection.query(sql,values);
 
+                log("outward_rows::", outward_rows);
+
                 let outwardrowdata = outward_rows[0];
                 outwardto = outwardrowdata["outwardto"];
                 outwarddate = formatDateDMY(outwardrowdata["outwarddate"]);
@@ -156,6 +167,7 @@ router.post(
 
                   logQuery(sql, values);
                   const [inward_rows]: any = await connection.query(sql, values)
+                  log("inward_rows::", inward_rows);
 
                   if(inward_rows.length === 0){
                     break;
@@ -223,9 +235,10 @@ router.post(
         return res.status(500).json(error);
       } finally{
         if(connection) {
+          console.log("inside if block");
           await connection.end()
+          log("after connection ended::", connection)
         };
-        console.log("after connection ended");
       }
     }
   )

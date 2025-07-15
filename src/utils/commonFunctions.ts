@@ -3,6 +3,16 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { db } from "@/db/dbConnect.js";
 import { DB_PREFIX } from "./constants.js";
+import { config } from "dotenv";
+config();
+
+const isDev = process.env.NODE_ENV !== 'production';
+
+export const log = (...args: any[]) => {
+  if (isDev) {
+    console.log('[LOG]', ...args);
+  }
+};
 
 export  function logQuery(psql:string , pvalues?:any[], pshouldconsole: boolean = true):void {
     let formattedQuery;
@@ -90,9 +100,9 @@ export async function GetBranchDBName_Web(branchcode: string): Promise<string> {
 }
 
 export function getFullDocumentNo(tmpsourcebranchcode: string, tmpsourcebranchid: string, tmpdocno: string): string {
-    console.log("tmpsourcebranchcode::", tmpsourcebranchcode);
-    console.log("tmpsourcebranchid::", typeof tmpsourcebranchid);
-    console.log("tmpdocno::", typeof tmpdocno);
+    log("tmpsourcebranchcode::", tmpsourcebranchcode);
+    log("tmpsourcebranchid::",  tmpsourcebranchid);
+    log("tmpdocno::", tmpdocno);
     
     const tmpstr = tmpsourcebranchcode + "/" + String(tmpsourcebranchid).padStart(2, "0") + "/" + 
     String(tmpdocno).padStart(7, " ");
