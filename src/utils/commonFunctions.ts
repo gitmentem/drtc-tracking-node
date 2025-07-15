@@ -42,7 +42,6 @@ export function formatDateDMY(pdate: any) {
         year: '2-digit'
     });
 }
-
 export function ucwords(str: string): string {
     return str.toLowerCase()
         .split(' ')
@@ -51,12 +50,11 @@ export function ucwords(str: string): string {
     // ! wont work on this usecase :ucwords(hello-world)
 }
 
-export async function GetBranchDBName_BranchId_Web(branchid: string): Promise<string> {
+export async function GetBranchDBName_BranchId_Web(branchid: string, connection: mysql.Connection): Promise<string> {
     let sql = "select pbranchcode from subbranchtable where branchid = ?";
     let values  = [branchid];
 
     try {
-        const connection = await db.Db()
         logQuery(sql, values);
         const [rows]: any = await connection.query(sql, values)
         
@@ -74,13 +72,12 @@ export async function GetBranchDBName_BranchId_Web(branchid: string): Promise<st
     }
 }
 
-export async function GetBranchDBName_Web(branchcode: string): Promise<string> {
+export async function GetBranchDBName_Web(branchcode: string, connection: mysql.Connection): Promise<string> {
     let sql = "select pbranchcode from subbranchtable where branchcode = ?";
     let values  = [branchcode];
     
 
     try {
-        const connection = await db.Db()
         logQuery(sql, values);
         const [rows]: any = await connection.query(sql, values)
         console.log("rows::",rows);
@@ -113,13 +110,18 @@ async function GetValuefromDb<T = any>(
     tablename: string, 
     idfldname: string, 
     fldname: string, 
-    idfldvalue: string | number
+    idfldvalue: string | number,
+    connection?: mysql.Connection
 ): Promise<T | null> {
 
     const sql = `select ${fldname} from ${tablename} where ${idfldname} = ?`;
     let values = [idfldvalue]
     try {
-        const connection = await db.Db();
+        // const connection = await db.Db();
+        if(!connection){
+            // ! return some error message
+            return null;
+        }
 
         logQuery(sql, values);
         const [rows]: any = await connection.query(sql, values);

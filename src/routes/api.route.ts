@@ -49,7 +49,7 @@ router.post(
         if (sourcebranchcode === "") {
           // do nothing
         } else {
-          dbname = await GetBranchDBName_Web(sourcebranchcode) + ".";
+          dbname = await GetBranchDBName_Web(sourcebranchcode, connection) + ".";
           biltynofull = getFullDocumentNo(sourcebranchcode, biltystateno, biltyno); 
           log("biltynofull::", biltynofull)
 
@@ -158,7 +158,7 @@ router.post(
                     break;
                   }
 
-                  dbname = await GetBranchDBName_BranchId_Web(outwardto) + ".";
+                  dbname = await GetBranchDBName_BranchId_Web(outwardto, connection) + ".";
                   challannofull = outwardnofull;
                   sql = `select inwarddate from ${dbname}inward as i left join ${dbname}inwardtrans as it
                     on i.challannofull = it.challannofull
