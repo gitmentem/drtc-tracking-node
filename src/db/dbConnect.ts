@@ -28,14 +28,14 @@ class DatabaseConnection {
       db: { ...this.prodConfig, database: process.env.DB_NAME },
     },
     local: {
-      db: { ...this.localConfig, database: "new" },
+      db: { ...this.localConfig, database: "drtc" },
     },
   };
 
-  async Db(): Promise<Connection> {
+  async connect(): Promise<Connection> {
     return mysql.createConnection(this.configs[this.environment].db);
   }
 }
 
-export const DB_MODE  = "prod";
+export const DB_MODE  = "local";
 export const db = new DatabaseConnection(DB_MODE); // or "prod"

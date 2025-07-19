@@ -117,7 +117,6 @@ async function GetValuefromDb<T = any>(
     const sql = `select ${fldname} from ${tablename} where ${idfldname} = ?`;
     let values = [idfldvalue]
     try {
-        // const connection = await db.Db();
         if(!connection){
             // ! return some error message
             return null;

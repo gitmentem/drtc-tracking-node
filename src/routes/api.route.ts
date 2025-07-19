@@ -11,7 +11,7 @@ const router = Router();
 router.post("/db-test", async(req:Request, res:Response)=>{
   let connection;
   try{
-    connection  = await db.Db();
+    connection  = await db.connect();
     let sql = `select * from companymaster`
     const [rows]: any = await connection.query(sql)
     console.log("rows::",rows);
@@ -33,7 +33,7 @@ router.post(
         let sql;
         let values;
         let apiresponse = {} as ApiResponse;
-        connection = await db.Db();
+        connection = await db.connect();
         
         let biltynofull;
         let biltydate;
