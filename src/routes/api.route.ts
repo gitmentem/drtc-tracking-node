@@ -236,6 +236,80 @@ router.post(
         };
       }
     }
-  )
+)
+
+router.post("/get-statedetails", async (req:Request, res:Response) => {
+  let connection;
+  let sql;
+  let values;
+  try {
+    let connection = await db.connect();  
+
+    sql = `SELECT stateid, statename 
+      FROM statemaster 
+      ORDER BY statename;`
+    const [rows]: any = await connection.query(sql);   
+
+    res.json({
+      success:true,
+      data: rows
+    })
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(error);
+  } finally {
+    if(connection) {
+      //@ts-ignore
+      await connection.end()
+    };
+  }
+})
+
+router.post("/get-branchdetails", async (req:Request, res:Response) => {
+  let connection;
+  let sql;
+  let values;
+  try {
+    let { stateid } = req.body
+
+    let connection = await db.connect(); 
+
+    sql = `
+      SELECT b.branchid, 
+      b.branchname,
+      b.branchcode,
+      b.address ,
+      b.contactperson,
+      b.mobile,
+      b.phoneo,
+      b.email,
+      c.cityname,
+      s.statename
+      FROM branchmaster b
+      LEFT JOIN citymaster c ON b.cityid = c.cityid
+      LEFT JOIN statemaster s ON c.stateid = s.stateid
+      WHERE s.stateid = ? AND active = "Yes"
+      ORDER BY b.branchname;`
+    values = [stateid];
+
+    logQuery(sql, values);
+
+    const [rows]: any = await connection.query(sql, values);   
+
+    res.json({
+      success: true,
+      data: rows
+    })
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(error);
+  } finally {
+    if(connection) {
+      //@ts-ignore
+      await connection.end()
+    };
+  }
+})
 
 export default router;
