@@ -137,3 +137,20 @@ async function GetValuefromDb<T = any>(
         throw error;
     }
 }
+
+export function date(
+    format: string, 
+    timestamp: number = Math.floor(Date.now() / 1000)
+): string {
+  const date = new Date(timestamp * 1000); 
+  const map: { [key: string]: string | number } = {
+    Y: date.getFullYear(),
+    m: String(date.getMonth() + 1).padStart(2, '0'),
+    d: String(date.getDate()).padStart(2, '0'),
+    H: String(date.getHours()).padStart(2, '0'),
+    i: String(date.getMinutes()).padStart(2, '0'),
+    s: String(date.getSeconds()).padStart(2, '0'),
+  };
+
+  return format.replace(/Y|m|d|H|i|s/g, (match: string) => String(map[match]))
+}
