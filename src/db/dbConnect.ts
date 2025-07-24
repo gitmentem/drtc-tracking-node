@@ -37,5 +37,5 @@ class DatabaseConnection {
   }
 }
 
-export const DB_MODE  = "local";
+export const DB_MODE  = "prod";
 export const db = new DatabaseConnection(DB_MODE); // or "prod"

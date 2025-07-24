@@ -51,7 +51,6 @@ router.post(
         } else {
           dbname = await GetBranchDBName_Web(sourcebranchcode, connection) + ".";
           biltynofull = getFullDocumentNo(sourcebranchcode, biltystateno, biltyno); 
-          log("biltynofull::", biltynofull)
 
           sql = `select sourcebranchcode, 
           biltystateno, 
@@ -75,8 +74,6 @@ router.post(
 
           logQuery(sql, values);
           const [rows] : any = await connection.query(sql, values);
-
-          log("first query rows::", rows);
 
           if (rows?.length === 0) {
             apiresponse["status"] = "error";
@@ -141,7 +138,7 @@ router.post(
                 logQuery(sql, values);
                 const [outward_rows]: any = await connection.query(sql,values);
 
-                log("outward_rows::", outward_rows);
+                // log("outward_rows::", outward_rows);
 
                 let outwardrowdata = outward_rows[0];
                 outwardto = outwardrowdata["outwardto"];
@@ -235,9 +232,7 @@ router.post(
         return res.status(500).json(error);
       } finally{
         if(connection) {
-          console.log("inside if block");
           await connection.end()
-          log("after connection ended::", connection)
         };
       }
     }
