@@ -245,9 +245,11 @@ router.post("/get-statedetails", async (req:Request, res:Response) => {
   try {
     let connection = await db.connect();  
 
-    sql = `SELECT stateid, statename 
-      FROM statemaster 
-      ORDER BY statename;`
+    sql = `SELECT sm.*
+    FROM statemaster AS sm INNER JOIN company_gst AS cg
+    ON sm.stateid = cg.stateid order by sm.statename`
+
+    logQuery(sql);
     const [rows]: any = await connection.query(sql);   
 
     res.json({
@@ -292,8 +294,16 @@ router.post("/get-branchdetails", async (req:Request, res:Response) => {
       ORDER BY b.branchname;`
     values = [stateid];
 
+    sql = `
+      select * from branchmaster as bm
+      LEFT JOIN citymaster as cm on bm.cityid = cm.cityid 
+      LEFT JOIN statemaster as sm on sm.stateid=cm.stateid 
+      where cm.stateid = ? and bm.active = "Yes" 
+      order by bm.branchname
+    `
+    values = [stateid];
+    
     logQuery(sql, values);
-
     const [rows]: any = await connection.query(sql, values);   
 
     res.json({
