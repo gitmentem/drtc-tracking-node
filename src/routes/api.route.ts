@@ -8,19 +8,19 @@ import type { ITrackingRequest } from "@/types/tracking.type";
 
 const router = Router();
 
-router.post("/db-test", async(req:Request, res:Response)=>{
-  let connection;
-  try{
-    connection  = await db.connect();
-    let sql = `select * from companymaster`
-    const [rows]: any = await connection.query(sql)
-    console.log("rows::",rows);
-    res.send("working")
-  } finally {
-    if(connection) await connection.end();
-    log("after connection ended::", connection)
-  }
-})
+// router.post("/db-test", async(req:Request, res:Response)=>{
+//   let connection;
+//   try{
+//     connection  = await db.connect();
+//     let sql = `select * from companymaster`
+//     const [rows]: any = await connection.query(sql)
+//     console.log("rows::",rows);
+//     res.send("working")
+//   } finally {
+//     if(connection) await connection.end();
+//     log("after connection ended::", connection)
+//   }
+// })
 
 router.post(
   "/track", async (
@@ -33,7 +33,7 @@ router.post(
         let sql;
         let values;
         let apiresponse = {} as ApiResponse;
-        connection = await db.connect();
+        connection = await db.connect("ibmserver");
         
         let biltynofull;
         let biltydate;
@@ -243,7 +243,7 @@ router.post("/get-statedetails", async (req:Request, res:Response) => {
   let sql;
   let values;
   try {
-    let connection = await db.connect();  
+    let connection = await db.connect("drtcindia");  
 
     sql = `SELECT sm.*
     FROM statemaster AS sm INNER JOIN company_gst AS cg
@@ -274,7 +274,7 @@ router.post("/get-branchdetails", async (req:Request, res:Response) => {
   try {
     let { stateid } = req.body
 
-    let connection = await db.connect(); 
+    let connection = await db.connect("drtcindia"); 
 
     sql = `
       SELECT b.branchid, 
