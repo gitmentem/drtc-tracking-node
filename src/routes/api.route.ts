@@ -9,19 +9,19 @@ import type { RowDataPacket } from "mysql2";
 
 const router = Router();
 
-router.post("/db-test", async(req:Request, res:Response)=>{
-  let connection;
-  try{
-    connection  = await db.connect();
-    let sql = `select * from companymaster`
-    const [rows]: any = await connection.query(sql)
-    console.log("rows::",rows);
-    res.send("working")
-  } finally {
-    if(connection) await connection.end();
-    log("after connection ended::", connection)
-  }
-})
+// router.post("/db-test", async(req:Request, res:Response)=>{
+//   let connection;
+//   try{
+//     connection  = await db.connect();
+//     let sql = `select * from companymaster`
+//     const [rows]: any = await connection.query(sql)
+//     console.log("rows::",rows);
+//     res.send("working")
+//   } finally {
+//     if(connection) await connection.end();
+//     log("after connection ended::", connection)
+//   }
+// })
 
 router.post(
   "/track", async (
@@ -34,7 +34,7 @@ router.post(
         let sql;
         let values;
         let apiresponse = {} as ApiResponse;
-        connection = await db.connect();
+        connection = await db.connect("ibmserver");
         
         let biltynofull;
         let biltydate;
@@ -54,7 +54,6 @@ router.post(
         } else {
           dbname = await GetBranchDBName_Web(sourcebranchcode, connection) + ".";
           biltynofull = getFullDocumentNo(sourcebranchcode, biltystateno, biltyno); 
-          log("biltynofull::", biltynofull)
 
           sql = `select sourcebranchcode, 
           biltystateno, 
@@ -78,8 +77,6 @@ router.post(
 
           logQuery(sql, values);
           const [rows] : any = await connection.query(sql, values);
-
-          log("first query rows::", rows);
 
           if (rows?.length === 0) {
             apiresponse["status"] = "error";
@@ -160,7 +157,7 @@ router.post(
                   logQuery(sql, values);
                   const [outward_rows]: any = await connection.query(sql,values);
 
-                  log("outward_rows::", outward_rows);
+                // log("outward_rows::", outward_rows);
 
                   let outwardrowdata = outward_rows[0];
                   outwardto = outwardrowdata["outwardto"];
@@ -268,11 +265,13 @@ router.post("/get-statedetails", async (req:Request, res:Response) => {
   let sql;
   let values;
   try {
-    let connection = await db.connect();  
+    let connection = await db.connect("drtcindia");  
 
-    sql = `SELECT stateid, statename 
-      FROM statemaster 
-      ORDER BY statename;`
+    sql = `SELECT sm.*
+    FROM statemaster AS sm INNER JOIN company_gst AS cg
+    ON sm.stateid = cg.stateid order by sm.statename`
+
+    logQuery(sql);
     const [rows]: any = await connection.query(sql);   
 
     res.json({
@@ -297,7 +296,7 @@ router.post("/get-branchdetails", async (req:Request, res:Response) => {
   try {
     let { stateid } = req.body
 
-    let connection = await db.connect(); 
+    let connection = await db.connect("drtcindia"); 
 
     sql = `
       SELECT b.branchid, 
@@ -317,8 +316,16 @@ router.post("/get-branchdetails", async (req:Request, res:Response) => {
       ORDER BY b.branchname;`
     values = [stateid];
 
+    sql = `
+      select * from branchmaster as bm
+      LEFT JOIN citymaster as cm on bm.cityid = cm.cityid 
+      LEFT JOIN statemaster as sm on sm.stateid=cm.stateid 
+      where cm.stateid = ? and bm.active = "Yes" 
+      order by bm.branchname
+    `
+    values = [stateid];
+    
     logQuery(sql, values);
-
     const [rows]: any = await connection.query(sql, values);   
 
     res.json({
@@ -326,44 +333,6 @@ router.post("/get-branchdetails", async (req:Request, res:Response) => {
       data: rows
     })
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
-  } finally {
-    if(connection) {
-      //@ts-ignore
-      await connection.end()
-    };
-  }
-})
-
-router.post("/get-alldata", async (req:Request, res:Response) => {
-  let connection;
-  let sql;
-  let values;
-  try {
-    let connection = await db.connect();  
-
-    sql = `SELECT 'state' AS TYPE, stateid AS id, statename AS NAME, 
-       NULL AS branchid, NULL AS branchname, NULL AS branchcode, 
-       NULL AS address, NULL AS contactperson, NULL AS mobile, 
-       NULL AS phoneo, NULL AS email, NULL AS cityname
-      FROM statemaster 
-      UNION ALL
-      SELECT 'branch' AS TYPE, s.stateid, s.statename,
-      b.branchid, b.branchname, b.branchcode,
-      b.address, b.contactperson, b.mobile, b.phoneo, b.email, c.cityname
-      FROM branchmaster b
-      LEFT JOIN citymaster c ON b.cityid = c.cityid
-      LEFT JOIN statemaster s ON c.stateid = s.stateid
-      WHERE b.active = "Yes"
-      ORDER BY TYPE, NAME;`
-    const [rows]: any = await connection.query(sql);   
-
-    res.json({
-      success:true,
-      data: rows
-    })
   } catch (error) {
     console.error(error);
     res.status(500).json(error);

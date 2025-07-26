@@ -3,16 +3,10 @@ import { config } from "dotenv";
 config();
 
 class DatabaseConnection {
-  private environment: "local" | "prod";
-
-  constructor(environment: "local" | "prod") {
-    this.environment = environment;
-  }
-
-  private prodConfig = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+  private IBMServerConfig = {
+    host: process.env.IBMSERVER_HOST,
+    user: process.env.IBMSERVER_USER,
+    password: process.env.IBMSERVER_PASSWORD,
     connectTimeout:20000,
     dateStrings: true // so that when querying the db i will get 0000-00-00 as date string not date object
   };
@@ -23,19 +17,27 @@ class DatabaseConnection {
     password: "123456",
   };
 
+  private drtcIndiaConfig = {
+    host: process.env.DRTCINDIA_HOST,
+    user: process.env.DRTCINDIA_USER,
+    password: process.env.DRTCINDIA_PASSWORD,
+  };
+
   private configs = {
-    prod: {
-      db: { ...this.prodConfig, database: process.env.DB_NAME },
+    ibmserver: {
+      db: { ...this.IBMServerConfig, database: process.env.IBMSERVER_DBNAME },
     },
     local: {
       db: { ...this.localConfig, database: "drtc" },
     },
+    drtcindia: {
+      db: { ...this.drtcIndiaConfig, database: process.env.DRTCINDIA_DBNAME },
+    },
   };
 
-  async connect(): Promise<Connection> {
-    return mysql.createConnection(this.configs[this.environment].db);
+  async connect(environment: "ibmserver" | "local" | "drtcindia"): Promise<Connection> {
+    return mysql.createConnection(this.configs[environment].db);
   }
 }
 
-export const DB_MODE  = "local";
-export const db = new DatabaseConnection(DB_MODE); // or "prod"
+export const db = new DatabaseConnection();
