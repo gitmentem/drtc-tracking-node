@@ -154,3 +154,23 @@ export function date(
 
   return format.replace(/Y|m|d|H|i|s/g, (match: string) => String(map[match]))
 }
+
+export function add12MonthsToDate(biltydate: string): string {
+  const originalDate = new Date(biltydate);
+
+  // Create a new date to avoid mutating originalDate
+  const modifiedDate = new Date(originalDate);
+  modifiedDate.setMonth(modifiedDate.getMonth() + 12);
+
+  // Format to YYYY-MM-DD
+  const year = modifiedDate.getFullYear();
+  const month = String(modifiedDate.getMonth() + 1).padStart(2, '0');
+  const day = String(modifiedDate.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+// Example:
+const biltydate = "2023-07-26";
+const biltydate_modified = add12MonthsToDate(biltydate);
+console.log(biltydate_modified); // "2024-07-26"

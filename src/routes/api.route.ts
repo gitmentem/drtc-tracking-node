@@ -2,7 +2,7 @@ import { Router } from "express";
 import { TryCatch } from "@/middlewares/error.js";
 import { type Request, type Response, type NextFunction } from "express";
 import { db } from "@/db/dbConnect.js";
-import { date, formatDateDMY, GetBranchDBName_BranchId_Web, GetBranchDBName_Web, getFullDocumentNo, log, logQuery, ucwords } from "@/utils/commonFunctions.js";
+import { add12MonthsToDate, date, formatDateDMY, GetBranchDBName_BranchId_Web, GetBranchDBName_Web, getFullDocumentNo, log, logQuery, ucwords } from "@/utils/commonFunctions.js";
 import { type ApiResponse, type IDetailsLine } from "@/types/response.type.js";
 import type { ITrackingRequest } from "@/types/tracking.type";
 import type { RowDataPacket } from "mysql2";
@@ -101,14 +101,17 @@ router.post(
             let current_date;
 
             let row = rows[0] as any;
-
+            
             sourcebranchcode = row["sourcebranchcode"];
             biltystateno = row["biltystateno"];
             biltyno = row["biltyno"];
             biltydate_YMD = row["biltydate"];
+            // biltydate_YMD - 2025-03-01 format
             biltydate = formatDateDMY(row["biltydate"]);
             months = 3;
-            // $biltydate_modified = date('Y-m-d', strtotime("+12 months", strtotime(date("Y-m-d", strtotime($row["biltydate"])))));
+            biltydate_modified = add12MonthsToDate(row["biltydate"])
+            log("biltydateYMD::",row["biltydate"])
+            log("biltydate_modified::", biltydate_modified);
             frombranchname = ucwords(row["frombranchname"]); 
             tobranchname = row["tobranchname"];
             outwardsourcebranchcode = row["outwardsourcebranchcode"];
@@ -121,11 +124,12 @@ router.post(
             if (outwardno !== 0) {
               outwardnofull = getFullDocumentNo(outwardsourcebranchcode, outwardstateno, outwardno);
             }
+
             time = Math.floor(Date.now() / 1000);
             current_date = date("Y-m-d", time)
             log("current_date::", current_date);
 
-            //@ts-ignore - think how its gonna compare the dates?
+            log("biltydate_modified >= current_date::", biltydate_modified >= current_date );
             if (biltydate_modified >= current_date ) {
               if(cancellationno !== 0){
                 apiresponse["grstatus"] = 'CANCELLED G.R.';
@@ -244,7 +248,9 @@ router.post(
               }
               apiresponse["details"] = details;
             } else {
-              
+              apiresponse["status"] = "error";
+              apiresponse["message"] = "Contact Booking Office for more information.";
+              apiresponse["details"] = [];
             }
           }
         }
@@ -298,23 +304,23 @@ router.post("/get-branchdetails", async (req:Request, res:Response) => {
 
     let connection = await db.connect("drtcindia"); 
 
-    sql = `
-      SELECT b.branchid, 
-      b.branchname,
-      b.branchcode,
-      b.address ,
-      b.contactperson,
-      b.mobile,
-      b.phoneo,
-      b.email,
-      c.cityname,
-      s.statename
-      FROM branchmaster b
-      LEFT JOIN citymaster c ON b.cityid = c.cityid
-      LEFT JOIN statemaster s ON c.stateid = s.stateid
-      WHERE s.stateid = ? AND active = "Yes"
-      ORDER BY b.branchname;`
-    values = [stateid];
+    // sql = `
+    //   SELECT b.branchid, 
+    //   b.branchname,
+    //   b.branchcode,
+    //   b.address ,
+    //   b.contactperson,
+    //   b.mobile,
+    //   b.phoneo,
+    //   b.email,
+    //   c.cityname,
+    //   s.statename
+    //   FROM branchmaster b
+    //   LEFT JOIN citymaster c ON b.cityid = c.cityid
+    //   LEFT JOIN statemaster s ON c.stateid = s.stateid
+    //   WHERE s.stateid = ? AND active = "Yes"
+    //   ORDER BY b.branchname;`
+    // values = [stateid];
 
     sql = `
       select * from branchmaster as bm
